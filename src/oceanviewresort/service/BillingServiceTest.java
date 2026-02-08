@@ -1,4 +1,4 @@
 package oceanviewresort.service;
 
-public class Temp {
+public class BillingServiceTest {
 }
