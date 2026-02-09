@@ -1,7 +1,5 @@
 package oceanviewresort.controller;
 
-
-
 import oceanviewresort.model.User;
 import oceanviewresort.service.AuthService;
 
@@ -27,9 +25,11 @@ public class LoginServlet extends HttpServlet {
         User user = authService.authenticate(username, password);
 
         if (user != null) {
-            response.getWriter().println("Login successful");
+            // Successful login → redirect to reservation page
+            response.sendRedirect("web/reservation.html");
         } else {
-            response.getWriter().println("Invalid credentials");
+            // Failed login → redirect back to login page
+            response.sendRedirect("web/login.html");
         }
     }
 }
