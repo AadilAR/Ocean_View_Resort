@@ -18,4 +18,19 @@ public class AuthService {
 
         return null;
     }
+
+    public boolean register(String username, String password, String role) {
+
+        if (userDAO.findByUsername(username) != null) {
+            return false; // Username exists
+        }
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(password);
+        user.setRole(role);
+
+        userDAO.addUser(user);
+        return true;
+    }
 }

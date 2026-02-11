@@ -3,11 +3,8 @@ package oceanviewresort.controller;
 import oceanviewresort.model.User;
 import oceanviewresort.service.AuthService;
 
-import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.*;
 import java.io.IOException;
 
 @WebServlet("/login")
@@ -17,19 +14,49 @@ public class LoginServlet extends HttpServlet {
 
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
+            throws IOException {
 
         String username = request.getParameter("username");
         String password = request.getParameter("password");
 
-        User user = authService.authenticate(username, password);
+        // Basic validation
+        if (username == null || password == null ||
+                username.trim().isEmpty() || password.trim().isEmpty()) {
+
+            response.setContentType("text/html");
+            response.getWriter().println("<h3>Username and password are required.</h3>");
+            response.getWriter().println("<a href='login.html'>Back to Login</a>");
+            return;
+        }
+
+        User user = authService.authenticate(username.trim(), password.trim());
 
         if (user != null) {
-            // Successful login → redirect to reservation page
-            response.sendRedirect("web/reservation.html");
+
+            // Create new session (invalidate old one for safety)
+            HttpSession session = request.getSession(false);
+            if (session != null) {
+                session.invalidate();
+            }
+
+            session = request.getSession(true);
+            session.setAttribute("loggedUser", user);
+            session.setAttribute("role", user.getRole());
+
+            // Redirect to reservation page
+            response.sendRedirect(request.getContextPath() + "/reservation.html");
+
         } else {
-            // Failed login → redirect back to login page
-            response.sendRedirect("web/login.html");
+            response.setContentType("text/html");
+            response.getWriter().println("<h3>Invalid username or password.</h3>");
+            response.getWriter().println("<a href='login.html'>Try Again</a>");
         }
+    }
+
+    @Override
+    protected void doGet(HttpServletRequest request, HttpServletResponse response)
+            throws IOException {
+
+        response.sendRedirect(request.getContextPath() + "/login.html");
     }
 }
