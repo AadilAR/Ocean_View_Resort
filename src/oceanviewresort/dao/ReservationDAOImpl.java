@@ -166,6 +166,25 @@ public class ReservationDAOImpl implements ReservationDAO {
         return reservations;
     }
 
+    @Override
+    public boolean deleteById(int reservationId) {
+
+        String sql = "DELETE FROM reservation WHERE reservation_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, reservationId);
+
+            return stmt.executeUpdate() > 0;
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return false;
+    }
+
     // ----------------------------------------
     // MAP RESULTSET TO OBJECT
     // ----------------------------------------

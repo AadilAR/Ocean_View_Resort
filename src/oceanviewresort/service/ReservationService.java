@@ -80,4 +80,13 @@ public class ReservationService {
 
         return reservationDAO.findByContactNumber(mobile.trim());
     }
+
+    public boolean cancelReservation(int reservationId) {
+
+        if (reservationId <= 0) {
+            throw new IllegalArgumentException("Invalid reservation ID");
+        }
+
+        return reservationDAO.deleteById(reservationId);
+    }
 }

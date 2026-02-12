@@ -25,6 +25,8 @@ public interface ReservationDAO {
 
     List<Reservation> findByContactNumber(String contactNumber);
 
+    boolean deleteById(int reservationId);
+
     /**
      * Checks if a room is available for a given date range.
      */

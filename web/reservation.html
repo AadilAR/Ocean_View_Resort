@@ -37,7 +37,7 @@
     }
 
     .container {
-        width: 500px;
+        width: 520px;
         margin: 40px auto;
         background: white;
         padding: 30px;
@@ -86,6 +86,7 @@
         margin-bottom: 20px;
         border-radius: 6px;
         border: 1px solid #ccc;
+        transition: 0.3s;
     }
 
     input:focus {
@@ -101,8 +102,10 @@
         color: white;
         border: none;
         border-radius: 6px;
-        font-size: 16px;
+        font-size: 15px;
         cursor: pointer;
+        font-weight: 600;
+        transition: 0.3s;
     }
 
     button:hover {
@@ -119,7 +122,6 @@
 
 <div class="header">
   Ocean View Resort Reservation System
-
   <div class="logout">
     <a href="logout">Logout</a>
   </div>
@@ -131,25 +133,22 @@
 
   <div id="messageBox" class="message"></div>
 
-  <!-- ===================== -->
   <!-- SEARCH SECTION -->
-  <!-- ===================== -->
-
   <h3>Search Reservation by Mobile</h3>
-
   <form method="get" action="reserve">
     <input type="text" name="search"
-           placeholder="Enter mobile number" required>
+           placeholder="Enter mobile number"
+           pattern="[0-9]{7,15}"
+           title="Enter valid mobile number"
+           required>
     <button type="submit">Search</button>
   </form>
 
   <div class="divider"></div>
 
-  <!-- ===================== -->
   <!-- BOOKING FORM -->
-  <!-- ===================== -->
-
-  <form method="post" action="reserve">
+  <form method="post" action="reserve"
+        onsubmit="return confirm('Confirm reservation booking?');">
 
     <label>Guest Name</label>
     <input type="text" name="guestName" required>
@@ -158,10 +157,13 @@
     <input type="text" name="address">
 
     <label>Contact Number</label>
-    <input type="text" name="contactNumber" required>
+    <input type="text" name="contactNumber"
+           pattern="[0-9]{7,15}"
+           title="Enter valid mobile number"
+           required>
 
     <label>Room ID</label>
-    <input type="number" name="roomId" required>
+    <input type="number" name="roomId" min="1" required>
 
     <label>Check-in Date</label>
     <input type="date" name="checkIn" required>
@@ -183,20 +185,28 @@
   const box = document.getElementById("messageBox");
 
   if (error === "unavailable") {
-      box.className = "message error";
-      box.innerText = "Room is already booked for the selected dates.";
-      box.style.display = "block";
+      showMessage("Room is already booked for the selected dates.", "error");
   }
 
   if (error === "invalidDate") {
-      box.className = "message error";
-      box.innerText = "Invalid check-in and check-out dates.";
-      box.style.display = "block";
+      showMessage("Invalid check-in and check-out dates.", "error");
+  }
+
+  if (error === "notfound") {
+      showMessage("Reservation not found.", "error");
   }
 
   if (success === "booked") {
-      box.className = "message success";
-      box.innerText = "Reservation successful!";
+      showMessage("Reservation successful!", "success");
+  }
+
+  if (success === "cancelled") {
+      showMessage("Reservation cancelled successfully.", "success");
+  }
+
+  function showMessage(message, type) {
+      box.className = "message " + type;
+      box.innerText = message;
       box.style.display = "block";
   }
 </script>
