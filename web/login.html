@@ -3,11 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <title>Ocean View Resort | Login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
+        * {
+            box-sizing: border-box;
+        }
+
         body {
             margin: 0;
-            font-family: Arial, sans-serif;
+            font-family: "Segoe UI", Arial, sans-serif;
             background: linear-gradient(to right, #0f2027, #203a43, #2c5364);
             display: flex;
             justify-content: center;
@@ -18,46 +23,90 @@
         .login-container {
             background: white;
             padding: 40px;
-            border-radius: 12px;
-            width: 360px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+            border-radius: 14px;
+            width: 380px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+            text-align: center;
+            animation: fadeIn 0.4s ease-in-out;
+        }
+
+        h2 {
+            margin-bottom: 25px;
+            color: #2c5364;
+            font-weight: 600;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            font-size: 14px;
+            display: none;
             text-align: center;
         }
 
-        .login-container h2 {
-            margin-bottom: 25px;
-            color: #2c5364;
+        .error {
+            background-color: #f8d7da;
+            color: #842029;
+        }
+
+        .success {
+            background-color: #d1e7dd;
+            color: #0f5132;
         }
 
         label {
             display: block;
             text-align: left;
-            font-weight: bold;
-            margin-bottom: 5px;
+            font-weight: 600;
+            margin-bottom: 6px;
         }
 
         input {
             width: 100%;
-            padding: 10px;
+            padding: 11px;
             margin-bottom: 18px;
-            border-radius: 6px;
+            border-radius: 8px;
             border: 1px solid #ccc;
-            box-sizing: border-box;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        input:focus {
+            border-color: #2c5364;
+            outline: none;
+            box-shadow: 0 0 6px rgba(44,83,100,0.4);
         }
 
         .login-btn {
             width: 100%;
-            padding: 12px;
+            padding: 13px;
             background-color: #2c5364;
             color: white;
             border: none;
-            border-radius: 6px;
-            font-size: 16px;
+            border-radius: 8px;
+            font-size: 15px;
             cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
         }
 
         .login-btn:hover {
             background-color: #1e3c50;
+        }
+
+        .forgot-link {
+            margin-top: 10px;
+            font-size: 14px;
+        }
+
+        .forgot-link a {
+            text-decoration: none;
+            color: #2c5364;
+        }
+
+        .forgot-link a:hover {
+            text-decoration: underline;
         }
 
         .divider {
@@ -73,12 +122,14 @@
 
         .signup-btn {
             width: 100%;
-            padding: 10px;
+            padding: 11px;
             background-color: #f4f7fa;
             color: #2c5364;
             border: 1px solid #2c5364;
-            border-radius: 6px;
+            border-radius: 8px;
             cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
         }
 
         .signup-btn:hover {
@@ -90,6 +141,11 @@
             font-size: 12px;
             color: #777;
         }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-8px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
     </style>
 </head>
 <body>
@@ -97,6 +153,8 @@
 <div class="login-container">
 
     <h2>Ocean View Resort</h2>
+
+    <div id="messageBox" class="message"></div>
 
     <form method="post" action="login">
         <label>Username</label>
@@ -107,6 +165,10 @@
 
         <button type="submit" class="login-btn">Login</button>
     </form>
+
+    <div class="forgot-link">
+        <a href="forgotPassword.html">Forgot Password?</a>
+    </div>
 
     <div class="divider"></div>
 
@@ -125,6 +187,33 @@
     </div>
 
 </div>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const error = params.get("error");
+    const success = params.get("success");
+
+    const box = document.getElementById("messageBox");
+
+    // Handle errors
+    if (error === "invalid") {
+        box.className = "message error";
+        box.innerText = "Invalid username or password.";
+        box.style.display = "block";
+    }
+    else if (error === "empty") {
+        box.className = "message error";
+        box.innerText = "Username and password are required.";
+        box.style.display = "block";
+    }
+
+    // Handle success
+    if (success === "registered") {
+        box.className = "message success";
+        box.innerText = "Account created successfully. Please login.";
+        box.style.display = "block";
+    }
+</script>
 
 </body>
 </html>

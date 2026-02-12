@@ -10,36 +10,45 @@ import java.sql.SQLException;
 
 public class UserDAOImpl implements UserDAO {
 
+    private static final String FIND_BY_USERNAME_SQL =
+            "SELECT user_id, username, password, role FROM user WHERE username = ?";
+
+    private static final String INSERT_USER_SQL =
+            "INSERT INTO user (username, password, role) VALUES (?, ?, ?)";
+
     @Override
     public User findByUsername(String username) {
 
-        String sql = "SELECT * FROM user WHERE username = ?";
-        User user = null;
+        if (username == null || username.trim().isEmpty()) {
+            return null;
+        }
 
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(FIND_BY_USERNAME_SQL)) {
 
-            stmt.setString(1, username);
-            ResultSet rs = stmt.executeQuery();
+            stmt.setString(1, username.trim());
 
-            if (rs.next()) {
-                user = new User(
-                        rs.getInt("user_id"),
-                        rs.getString("username"),
-                        rs.getString("password"),
-                        rs.getString("role")
-                );
+            try (ResultSet rs = stmt.executeQuery()) {
+
+                if (rs.next()) {
+                    return new User(
+                            rs.getInt("user_id"),
+                            rs.getString("username"),
+                            rs.getString("password"),
+                            rs.getString("role")
+                    );
+                }
             }
 
         } catch (SQLException e) {
-            e.printStackTrace();
+            System.err.println("Error finding user by username: " + e.getMessage());
         }
 
-        return user;
+        return null;
     }
 
     @Override
-    public void addUser(User user) {
+    public boolean addUser(User user) {
 
         String sql = "INSERT INTO user (username, password, role) VALUES (?, ?, ?)";
 
@@ -51,9 +60,18 @@ public class UserDAOImpl implements UserDAO {
             stmt.setString(3, user.getRole());
 
             stmt.executeUpdate();
+            return true;
 
         } catch (SQLException e) {
-            e.printStackTrace();
+
+            if (e.getMessage().contains("Duplicate")) {
+                System.out.println("Username already exists!");
+            } else {
+                e.printStackTrace();
+            }
+
+            return false;
         }
     }
+
 }

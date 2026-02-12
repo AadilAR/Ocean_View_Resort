@@ -2,30 +2,82 @@ package oceanviewresort.service;
 
 import oceanviewresort.dao.ReservationDAO;
 import oceanviewresort.dao.ReservationDAOImpl;
-import oceanviewresort.dao.RoomDAO;
-import oceanviewresort.dao.RoomDAOImpl;
 import oceanviewresort.model.Reservation;
-import oceanviewresort.model.Room;
+
+import java.time.LocalDate;
+import java.util.List;
 
 public class ReservationService {
 
     private final ReservationDAO reservationDAO = new ReservationDAOImpl();
-    private final RoomDAO roomDAO = new RoomDAOImpl();
     private final BillingService billingService = new BillingService();
 
-    public void createReservation(Reservation reservation) {
+    // ----------------------------------------
+    // CREATE RESERVATION
+    // ----------------------------------------
 
-        Room room = roomDAO.getRoomById(
-                reservation.getRoom().getRoomId()
+    public boolean createReservation(Reservation reservation) {
+
+        LocalDate checkIn = reservation.getCheckInDate();
+        LocalDate checkOut = reservation.getCheckOutDate();
+
+        // Validate date range
+        if (checkIn == null || checkOut == null ||
+                !checkOut.isAfter(checkIn)) {
+
+            throw new IllegalArgumentException("Invalid date range");
+        }
+
+        // Prevent double booking
+        boolean available = reservationDAO.isRoomAvailable(
+                reservation.getRoom().getRoomId(),
+                checkIn,
+                checkOut
         );
 
-        double total = billingService.calculateTotal(
-                reservation.getCheckInDate(),
-                reservation.getCheckOutDate(),
-                room.getPricePerNight()
+        if (!available) {
+            return false; // Room already booked
+        }
+
+        // Calculate total price
+        double totalAmount = billingService.calculateTotal(
+                checkIn,
+                checkOut,
+                reservation.getRoom().getPricePerNight()
         );
 
-        reservation.setTotalAmount(total);
-        reservationDAO.addReservation(reservation);
+        reservation.setTotalAmount(totalAmount);
+
+        // Save reservation
+        return reservationDAO.save(reservation);
+    }
+
+    // ----------------------------------------
+    // GET RESERVATION BY ID
+    // ----------------------------------------
+
+    public Reservation getReservationById(int reservationId) {
+        return reservationDAO.findById(reservationId);
+    }
+
+    // ----------------------------------------
+    // GET ALL RESERVATIONS
+    // ----------------------------------------
+
+    public List<Reservation> getAllReservations() {
+        return reservationDAO.findAll();
+    }
+
+    // ----------------------------------------
+    // SEARCH BY MOBILE NUMBER
+    // ----------------------------------------
+
+    public List<Reservation> searchByMobile(String mobile) {
+
+        if (mobile == null || mobile.trim().isEmpty()) {
+            throw new IllegalArgumentException("Mobile number required");
+        }
+
+        return reservationDAO.findByContactNumber(mobile.trim());
     }
 }

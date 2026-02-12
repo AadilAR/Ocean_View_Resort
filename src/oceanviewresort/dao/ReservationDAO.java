@@ -2,13 +2,33 @@ package oceanviewresort.dao;
 
 import oceanviewresort.model.Reservation;
 
+import java.time.LocalDate;
 import java.util.List;
 
 public interface ReservationDAO {
 
-    void addReservation(Reservation reservation);
+    /**
+     * Saves a reservation.
+     * @return true if saved successfully
+     */
+    boolean save(Reservation reservation);
 
-    Reservation getReservationById(int reservationId);
+    /**
+     * Finds reservation by ID.
+     */
+    Reservation findById(int reservationId);
 
-    List<Reservation> getAllReservations();
+    /**
+     * Returns all reservations.
+     */
+    List<Reservation> findAll();
+
+    List<Reservation> findByContactNumber(String contactNumber);
+
+    /**
+     * Checks if a room is available for a given date range.
+     */
+    boolean isRoomAvailable(int roomId,
+                            LocalDate checkIn,
+                            LocalDate checkOut);
 }
