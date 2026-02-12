@@ -32,7 +32,7 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // -------- CANCEL RESERVATION --------
+        // ---------- CANCEL ----------
         String cancelId = request.getParameter("cancelId");
 
         if (cancelId != null && !cancelId.isBlank()) {
@@ -40,29 +40,33 @@ public class ReservationServlet extends HttpServlet {
             return;
         }
 
-        // -------- CREATE RESERVATION --------
+        // ---------- CREATE ----------
         try {
             Reservation reservation = buildReservationFromRequest(request);
 
             boolean success = reservationService.createReservation(reservation);
 
             if (success) {
-                redirect(response, request, RESERVATION_PAGE + "?success=booked");
+                redirect(response, request,
+                        RESERVATION_PAGE + "?success=booked");
             } else {
-                redirect(response, request, RESERVATION_PAGE + "?error=unavailable");
+                redirect(response, request,
+                        RESERVATION_PAGE + "?error=unavailable");
             }
 
         } catch (IllegalArgumentException e) {
-            redirect(response, request, RESERVATION_PAGE + "?error=invalidDate");
+            redirect(response, request,
+                    RESERVATION_PAGE + "?error=invalidDate");
 
         } catch (Exception e) {
             e.printStackTrace();
-            redirect(response, request, RESERVATION_PAGE + "?error=server");
+            redirect(response, request,
+                    RESERVATION_PAGE + "?error=server");
         }
     }
 
     // =====================================================
-    // GET → SEARCH BY MOBILE
+    // GET → SEARCH OR VIEW ALL
     // =====================================================
 
     @Override
@@ -76,20 +80,32 @@ public class ReservationServlet extends HttpServlet {
         }
 
         String searchMobile = request.getParameter("search");
+        String viewAll = request.getParameter("viewAll");
 
-        if (searchMobile == null || searchMobile.trim().isEmpty()) {
-            redirect(response, request, RESERVATION_PAGE);
+        List<Reservation> results;
+
+        // View all reservations
+        if (viewAll != null) {
+            results = reservationService.getAllReservations();
+            renderSearchResults(response, request,
+                    "All Reservations", results);
             return;
         }
 
-        List<Reservation> results =
-                reservationService.searchByMobile(searchMobile.trim());
+        // Search by mobile
+        if (searchMobile != null && !searchMobile.trim().isEmpty()) {
+            results = reservationService.searchByMobile(searchMobile.trim());
+            renderSearchResults(response, request,
+                    "Search Results for Mobile: " + searchMobile.trim(),
+                    results);
+            return;
+        }
 
-        renderSearchResults(response, request, searchMobile, results);
+        redirect(response, request, RESERVATION_PAGE);
     }
 
     // =====================================================
-    // HANDLE CANCEL LOGIC
+    // HANDLE CANCEL
     // =====================================================
 
     private void handleCancel(String cancelId,
@@ -118,12 +134,12 @@ public class ReservationServlet extends HttpServlet {
     }
 
     // =====================================================
-    // RENDER SEARCH RESULTS
+    // RENDER RESULTS PAGE
     // =====================================================
 
     private void renderSearchResults(HttpServletResponse response,
                                      HttpServletRequest request,
-                                     String searchMobile,
+                                     String title,
                                      List<Reservation> results)
             throws IOException {
 
@@ -133,11 +149,11 @@ public class ReservationServlet extends HttpServlet {
         out.println("""
         <html>
         <head>
-            <title>Search Results</title>
+            <title>Reservations</title>
             <style>
                 body { font-family: Segoe UI, Arial; background:#f4f7fa; margin:0; }
                 .container {
-                    width: 850px;
+                    width: 900px;
                     margin: 40px auto;
                     background: white;
                     padding: 30px;
@@ -181,18 +197,28 @@ public class ReservationServlet extends HttpServlet {
         <div class="container">
         """);
 
-        out.println("<h2>Search Results for Mobile: " + searchMobile + "</h2>");
+        out.println("<h2>" + title + "</h2>");
 
         if (results.isEmpty()) {
             out.println("<p>No reservations found.</p>");
         } else {
             out.println("<table>");
-            out.println("<tr><th>ID</th><th>Guest</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Total</th><th>Action</th></tr>");
+            out.println("<tr>"
+                    + "<th>ID</th>"
+                    + "<th>Guest</th>"
+                    + "<th>Mobile</th>"
+                    + "<th>Room</th>"
+                    + "<th>Check-In</th>"
+                    + "<th>Check-Out</th>"
+                    + "<th>Total</th>"
+                    + "<th>Action</th>"
+                    + "</tr>");
 
             for (Reservation r : results) {
                 out.println("<tr>");
                 out.println("<td>" + r.getReservationId() + "</td>");
                 out.println("<td>" + r.getGuestName() + "</td>");
+                out.println("<td>" + r.getContactNumber() + "</td>");
                 out.println("<td>" + r.getRoom().getRoomId() + "</td>");
                 out.println("<td>" + r.getCheckInDate() + "</td>");
                 out.println("<td>" + r.getCheckOutDate() + "</td>");
@@ -201,9 +227,8 @@ public class ReservationServlet extends HttpServlet {
                 out.println("<td>");
                 out.println("<form method='post' action='" + request.getContextPath() + "/reserve'>");
                 out.println("<input type='hidden' name='cancelId' value='" + r.getReservationId() + "'>");
-                out.println("<button type='submit' class='cancel-btn' " +
-                        "onclick=\"return confirm('Are you sure you want to cancel this reservation?');\">" +
-                        "Cancel</button>");
+                out.println("<button type='submit' class='cancel-btn' "
+                        + "onclick=\"return confirm('Cancel this reservation?');\">Cancel</button>");
                 out.println("</form>");
                 out.println("</td>");
 
@@ -213,8 +238,8 @@ public class ReservationServlet extends HttpServlet {
             out.println("</table>");
         }
 
-        out.println("<br><a href='" + request.getContextPath() +
-                "/reservation.html'>Back to Reservation Page</a>");
+        out.println("<br><a href='" + request.getContextPath()
+                + "/reservation.html'>Back to Reservation Page</a>");
         out.println("</div></body></html>");
     }
 
