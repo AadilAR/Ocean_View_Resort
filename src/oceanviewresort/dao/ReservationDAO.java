@@ -11,7 +11,7 @@ public interface ReservationDAO {
      * Saves a reservation.
      * @return true if saved successfully
      */
-    boolean save(Reservation reservation);
+    int save(Reservation reservation);
 
     /**
      * Finds reservation by ID.

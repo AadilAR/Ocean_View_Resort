@@ -12,50 +12,51 @@ import java.util.List;
 
 public class RoomDAOImpl implements RoomDAO {
 
+    private static final String SELECT_BY_ID =
+            "SELECT room_id, room_type, price_per_night FROM room WHERE room_id = ?";
+
+    private static final String SELECT_ALL =
+            "SELECT room_id, room_type, price_per_night FROM room";
+
     @Override
     public Room getRoomById(int roomId) {
 
-        String sql = "SELECT * FROM room WHERE room_id = ?";
-        Room room = null;
-
         try (Connection conn = DBUtil.getConnection();
-             PreparedStatement stmt = conn.prepareStatement(sql)) {
+             PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ID)) {
 
             stmt.setInt(1, roomId);
-            ResultSet rs = stmt.executeQuery();
 
-            if (rs.next()) {
-                room = new Room(
-                        rs.getInt("room_id"),
-                        rs.getString("room_type"),
-                        rs.getDouble("price_per_night")
-                );
+            try (ResultSet rs = stmt.executeQuery()) {
+                if (rs.next()) {
+                    return mapRoom(rs);
+                }
             }
 
         } catch (SQLException e) {
             e.printStackTrace();
         }
 
-        return room;
+        return null;
     }
 
-    @Override
-    public List<Room> getAllRooms() {
 
-        String sql = "SELECT * FROM room";
+    @Override
+    public List<Room> findAll() {
+
         List<Room> rooms = new ArrayList<>();
+
+        String sql = "SELECT room_id, room_type, price_per_night FROM room";
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
             while (rs.next()) {
-                Room room = new Room(
+                rooms.add(new Room(
                         rs.getInt("room_id"),
                         rs.getString("room_type"),
                         rs.getDouble("price_per_night")
-                );
-                rooms.add(room);
+                ));
             }
 
         } catch (SQLException e) {
@@ -63,5 +64,17 @@ public class RoomDAOImpl implements RoomDAO {
         }
 
         return rooms;
+    }
+
+    // ----------------------------------------
+    // MAP RESULTSET TO ROOM
+    // ----------------------------------------
+
+    private Room mapRoom(ResultSet rs) throws SQLException {
+        return new Room(
+                rs.getInt("room_id"),
+                rs.getString("room_type"),
+                rs.getDouble("price_per_night")
+        );
     }
 }

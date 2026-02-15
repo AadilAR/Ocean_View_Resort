@@ -16,19 +16,17 @@ public class ReservationService {
     // CREATE RESERVATION
     // ----------------------------------------
 
-    public boolean createReservation(Reservation reservation) {
+    public int createReservation(Reservation reservation) {
 
         LocalDate checkIn = reservation.getCheckInDate();
         LocalDate checkOut = reservation.getCheckOutDate();
 
-        // Validate date range
-        if (checkIn == null || checkOut == null ||
-                !checkOut.isAfter(checkIn)) {
-
+        // Validate dates
+        if (checkOut.isBefore(checkIn) || checkOut.equals(checkIn)) {
             throw new IllegalArgumentException("Invalid date range");
         }
 
-        // Prevent double booking
+        // Check room availability
         boolean available = reservationDAO.isRoomAvailable(
                 reservation.getRoom().getRoomId(),
                 checkIn,
@@ -36,21 +34,18 @@ public class ReservationService {
         );
 
         if (!available) {
-            return false; // Room already booked
+            return -1; // room not available
         }
 
-        // Calculate total price
-        double totalAmount = billingService.calculateTotal(
-                checkIn,
-                checkOut,
-                reservation.getRoom().getPricePerNight()
-        );
-
+        // Calculate total
+        long days = java.time.temporal.ChronoUnit.DAYS.between(checkIn, checkOut);
+        double totalAmount = days * reservation.getRoom().getPricePerNight();
         reservation.setTotalAmount(totalAmount);
 
-        // Save reservation
+        // Save and return generated reservation ID
         return reservationDAO.save(reservation);
     }
+
 
     // ----------------------------------------
     // GET RESERVATION BY ID
