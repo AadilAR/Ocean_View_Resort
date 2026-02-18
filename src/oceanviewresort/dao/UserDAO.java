@@ -17,4 +17,6 @@ public interface UserDAO {
      * @return true if saved successfully, false otherwise
      */
     boolean addUser(User user);
+
+    void updatePassword(int userId, String newPassword);
 }

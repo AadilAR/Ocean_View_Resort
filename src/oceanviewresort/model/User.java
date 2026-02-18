@@ -6,16 +6,23 @@ public class User {
     private String username;
     private String password;
     private String role;
+    private String securityQuestion;
+    private String securityAnswer;
 
     public User() {
     }
 
-    public User(int userId, String username, String password, String role) {
+    public User(int userId, String username,
+                String password, String role) {
         this.userId = userId;
         this.username = username;
         this.password = password;
         this.role = role;
     }
+
+    // =============================
+    // Getters & Setters
+    // =============================
 
     public int getUserId() {
         return userId;
@@ -47,5 +54,21 @@ public class User {
 
     public void setRole(String role) {
         this.role = role;
+    }
+
+    public String getSecurityQuestion() {
+        return securityQuestion;
+    }
+
+    public void setSecurityQuestion(String securityQuestion) {
+        this.securityQuestion = securityQuestion;
+    }
+
+    public String getSecurityAnswer() {
+        return securityAnswer;
+    }
+
+    public void setSecurityAnswer(String securityAnswer) {
+        this.securityAnswer = securityAnswer;
     }
 }

@@ -32,7 +32,7 @@
         width: 100%;
         height: 100%;
         background: rgba(0,0,0,0.55);
-        backdrop-filter: blur(4px);
+        backdrop-filter: blur(5px);
         z-index: 0;
     }
 
@@ -89,58 +89,51 @@
 
     h2 {
         text-align: center;
-        margin-bottom: 30px;
+        margin-bottom: 25px;
         font-weight: 600;
         letter-spacing: 1px;
     }
 
-    .message {
-        padding: 12px;
-        border-radius: 8px;
-        margin-bottom: 18px;
-        font-size: 14px;
-        display: none;
-        text-align: center;
-    }
-
-    .error {
-        background-color: rgba(255, 0, 0, 0.2);
-        color: #ffdede;
-    }
-
-    .success {
-        background-color: rgba(0, 255, 0, 0.2);
-        color: #ddffdd;
-    }
+    /* ================= FORM ================= */
 
     label {
         font-weight: 500;
         display: block;
         margin-bottom: 6px;
-        margin-top: 12px;
+        margin-top: 14px;
+        font-size: 14px;
     }
 
     input, select {
         width: 100%;
         padding: 12px;
-        margin-bottom: 18px;
-        border-radius: 10px;
+        border-radius: 12px;
         border: none;
         outline: none;
         font-size: 14px;
 
-        background: rgba(255,255,255,0.15);
+        background: rgba(255,255,255,0.18);
         color: white;
         transition: 0.3s ease;
     }
 
     input::placeholder {
-        color: rgba(255,255,255,0.7);
+        color: rgba(255,255,255,0.75);
+    }
+
+    select {
+        appearance: none;
+        background: rgba(255,255,255,0.18);
+        color: white;
+    }
+
+    select option {
+        color: black;
     }
 
     input:focus, select:focus {
-        box-shadow: 0 0 12px rgba(255,255,255,0.6);
-        background: rgba(255,255,255,0.25);
+        box-shadow: 0 0 14px rgba(255,255,255,0.7);
+        background: rgba(255,255,255,0.28);
     }
 
     .password-wrapper {
@@ -149,21 +142,29 @@
 
     .toggle-password {
         position: absolute;
-        right: 10px;
+        right: 12px;
         top: 35%;
         cursor: pointer;
-        font-size: 13px;
+        font-size: 12px;
         color: #ffffff;
+        opacity: 0.8;
     }
+
+    .toggle-password:hover {
+        opacity: 1;
+    }
+
+    /* ================= BUTTON ================= */
 
     button {
         width: 100%;
-        padding: 13px;
-        border-radius: 12px;
+        padding: 14px;
+        border-radius: 14px;
         border: none;
         font-size: 15px;
         cursor: pointer;
         font-weight: 600;
+        margin-top: 10px;
 
         background: linear-gradient(135deg, #2c5364, #203a43);
         color: white;
@@ -172,8 +173,10 @@
 
     button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
     }
+
+    /* ================= BACK LINK ================= */
 
     .back {
         text-align: center;
@@ -184,10 +187,11 @@
         text-decoration: none;
         color: #ffffff;
         font-size: 14px;
+        opacity: 0.85;
     }
 
     .back a:hover {
-        text-decoration: underline;
+        opacity: 1;
     }
 
     /* ================= HELP BUTTON ================= */
@@ -215,11 +219,11 @@
         transform: scale(1.1);
     }
 
+    /* Animation */
     @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-8px); }
+        from { opacity: 0; transform: translateY(-10px); }
         to { opacity: 1; transform: translateY(0); }
     }
-
   </style>
 </head>
 <body>
@@ -233,20 +237,15 @@
 
     <h2>Staff Registration</h2>
 
-    <div id="messageBox" class="message"></div>
-
-    <form method="post" action="signup" onsubmit="return validateForm()">
+    <form method="post" action="signup">
 
       <label>Username</label>
-      <input type="text" name="username" id="username"
-             required minlength="3"
-             placeholder="Enter username">
+      <input type="text" name="username" required minlength="3" placeholder="Enter username">
 
       <label>Password</label>
       <div class="password-wrapper">
         <input type="password" name="password" id="password"
-               required minlength="6"
-               placeholder="Minimum 6 characters">
+               required minlength="6" placeholder="Minimum 6 characters">
         <span class="toggle-password"
               onclick="togglePassword('password')">Show</span>
       </div>
@@ -254,8 +253,7 @@
       <label>Confirm Password</label>
       <div class="password-wrapper">
         <input type="password" name="confirmPassword"
-               id="confirmPassword" required
-               placeholder="Re-enter password">
+               id="confirmPassword" required placeholder="Re-enter password">
         <span class="toggle-password"
               onclick="togglePassword('confirmPassword')">Show</span>
       </div>
@@ -266,6 +264,23 @@
         <option value="STAFF">Staff</option>
         <option value="ADMIN">Admin</option>
       </select>
+
+      <label>Security Question</label>
+      <select name="securityQuestion" required>
+        <option value="">Select a question</option>
+        <option value="What is your favorite color?">
+          What is your favorite color?
+        </option>
+        <option value="What is your mother's maiden name?">
+          What is your mother's maiden name?
+        </option>
+        <option value="What city were you born in?">
+          What city were you born in?
+        </option>
+      </select>
+
+      <label>Security Answer</label>
+      <input type="text" name="securityAnswer" required placeholder="Enter answer">
 
       <button type="submit">Create Account</button>
     </form>
@@ -280,33 +295,9 @@
 <a href="help" class="help-btn">?</a>
 
 <script>
-  function validateForm() {
-      const password = document.getElementById("password").value;
-      const confirmPassword = document.getElementById("confirmPassword").value;
-
-      if (password !== confirmPassword) {
-          showMessage("Passwords do not match!", "error");
-          return false;
-      }
-
-      if (password.length < 6) {
-          showMessage("Password must be at least 6 characters!", "error");
-          return false;
-      }
-
-      return true;
-  }
-
   function togglePassword(fieldId) {
       const field = document.getElementById(fieldId);
       field.type = field.type === "password" ? "text" : "password";
-  }
-
-  function showMessage(message, type) {
-      const box = document.getElementById("messageBox");
-      box.className = "message " + type;
-      box.innerText = message;
-      box.style.display = "block";
   }
 </script>
 

@@ -19,40 +19,53 @@ public class SignupServlet extends HttpServlet {
                           HttpServletResponse response)
             throws IOException {
 
-        String username        = getTrimmed(request.getParameter("username"));
-        String password        = getTrimmed(request.getParameter("password"));
-        String confirmPassword = getTrimmed(request.getParameter("confirmPassword"));
-        String role            = getTrimmed(request.getParameter("role"));
+        String username        = trim(request.getParameter("username"));
+        String password        = trim(request.getParameter("password"));
+        String confirmPassword = trim(request.getParameter("confirmPassword"));
+        String role            = trim(request.getParameter("role"));
+        String securityQuestion =
+                trim(request.getParameter("securityQuestion"));
+        String securityAnswer  =
+                trim(request.getParameter("securityAnswer"));
 
-        // 1️⃣ Validate empty fields
-        if (isBlank(username) || isBlank(password)
-                || isBlank(confirmPassword) || isBlank(role)) {
+        // =============================
+        // VALIDATION
+        // =============================
+
+        if (isBlank(username)
+                || isBlank(password) || isBlank(confirmPassword)
+                || isBlank(role) || isBlank(securityQuestion)
+                || isBlank(securityAnswer)) {
 
             redirect(response, request, SIGNUP_PAGE + "?error=empty");
             return;
         }
 
-        // 2️⃣ Validate password match
         if (!password.equals(confirmPassword)) {
             redirect(response, request, SIGNUP_PAGE + "?error=passwordMismatch");
             return;
         }
 
-        // 3️⃣ Validate password length (server-side safety)
         if (password.length() < 6) {
             redirect(response, request, SIGNUP_PAGE + "?error=weakPassword");
             return;
         }
 
-        // 4️⃣ Validate role
         if (!isValidRole(role)) {
             redirect(response, request, SIGNUP_PAGE + "?error=invalidRole");
             return;
         }
 
+        // =============================
+        // REGISTER
+        // =============================
+
         try {
+
             boolean registered = authService
-                    .register(username, password, role.toUpperCase());
+                    .register(username, password,
+                              role.toUpperCase(),
+                              securityQuestion, securityAnswer);
 
             if (registered) {
                 redirect(response, request,
@@ -63,22 +76,22 @@ public class SignupServlet extends HttpServlet {
             }
 
         } catch (Exception e) {
-            e.printStackTrace(); // Replace with logger in production
+            e.printStackTrace(); // replace with logger later
             redirect(response, request,
                     SIGNUP_PAGE + "?error=server");
         }
     }
 
-    // ------------------------
-    // Helper Methods
-    // ------------------------
+    // =====================================
+    // Utility Methods
+    // =====================================
 
-    private String getTrimmed(String value) {
+    private String trim(String value) {
         return value == null ? null : value.trim();
     }
 
     private boolean isBlank(String value) {
-        return value == null || value.isEmpty();
+        return value == null || value.trim().isEmpty();
     }
 
     private boolean isValidRole(String role) {
@@ -89,6 +102,7 @@ public class SignupServlet extends HttpServlet {
     private void redirect(HttpServletResponse response,
                           HttpServletRequest request,
                           String path) throws IOException {
+
         response.sendRedirect(request.getContextPath() + path);
     }
 }
