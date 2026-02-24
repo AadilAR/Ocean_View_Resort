@@ -8,4 +8,6 @@ public interface RoomDAO {
     Room getRoomById(int roomId);
 
     List<Room> findAll();
+
+    double getPriceByRoomId(int roomId);
 }

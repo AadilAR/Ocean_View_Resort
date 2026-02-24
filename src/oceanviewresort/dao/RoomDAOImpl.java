@@ -66,6 +66,31 @@ public class RoomDAOImpl implements RoomDAO {
         return rooms;
     }
 
+    @Override
+    public double getPriceByRoomId(int roomId) {
+
+        double price = 0;
+
+        String sql = "SELECT price_per_night FROM room WHERE room_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql)) {
+
+            stmt.setInt(1, roomId);
+
+            ResultSet rs = stmt.executeQuery();
+
+            if (rs.next()) {
+                price = rs.getDouble("price_per_night");
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return price;
+    }
+
     // ----------------------------------------
     // MAP RESULTSET TO ROOM
     // ----------------------------------------
