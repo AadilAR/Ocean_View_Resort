@@ -4,10 +4,18 @@ import oceanviewresort.model.Reservation;
 import oceanviewresort.model.Room;
 import oceanviewresort.util.DBUtil;
 
-import java.sql.*;
+import java.sql.Connection;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.sql.Statement;
+import java.sql.Date;
+
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class ReservationDAOImpl implements ReservationDAO {
 
@@ -46,23 +54,16 @@ public class ReservationDAOImpl implements ReservationDAO {
             AND check_out > ?
             """;
 
-    // ----------------------------------------
+    // ============================
     // SAVE RESERVATION
-    // ----------------------------------------
+    // ============================
 
     @Override
     public int save(Reservation reservation) {
 
-        String sql = """
-            INSERT INTO reservation
-            (guest_name, address, contact_number,
-             room_id, check_in, check_out, total_amount)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """;
-
         try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt =
-                     conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
+                     conn.prepareStatement(INSERT_SQL, Statement.RETURN_GENERATED_KEYS)) {
 
             stmt.setString(1, reservation.getGuestName());
             stmt.setString(2, reservation.getAddress());
@@ -76,7 +77,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
             ResultSet keys = stmt.getGeneratedKeys();
             if (keys.next()) {
-                return keys.getInt(1); // return reservation_id
+                return keys.getInt(1);
             }
 
         } catch (SQLException e) {
@@ -86,10 +87,9 @@ public class ReservationDAOImpl implements ReservationDAO {
         return -1;
     }
 
-
-    // ----------------------------------------
+    // ============================
     // FIND BY ID
-    // ----------------------------------------
+    // ============================
 
     @Override
     public Reservation findById(int reservationId) {
@@ -112,9 +112,9 @@ public class ReservationDAOImpl implements ReservationDAO {
         return null;
     }
 
-    // ----------------------------------------
+    // ============================
     // FIND ALL
-    // ----------------------------------------
+    // ============================
 
     @Override
     public List<Reservation> findAll() {
@@ -136,9 +136,9 @@ public class ReservationDAOImpl implements ReservationDAO {
         return reservations;
     }
 
-    // ----------------------------------------
-    // PREVENT DOUBLE BOOKING
-    // ----------------------------------------
+    // ============================
+    // CHECK ROOM AVAILABILITY
+    // ============================
 
     @Override
     public boolean isRoomAvailable(int roomId,
@@ -165,9 +165,9 @@ public class ReservationDAOImpl implements ReservationDAO {
         return false;
     }
 
-    // ----------------------------------------
-    // SEARCH BY MOBILE NUMBER
-    // ----------------------------------------
+    // ============================
+    // SEARCH BY CONTACT NUMBER
+    // ============================
 
     @Override
     public List<Reservation> findByContactNumber(String contactNumber) {
@@ -192,9 +192,9 @@ public class ReservationDAOImpl implements ReservationDAO {
         return reservations;
     }
 
-    // ----------------------------------------
+    // ============================
     // DELETE RESERVATION
-    // ----------------------------------------
+    // ============================
 
     @Override
     public boolean deleteById(int reservationId) {
@@ -212,10 +212,106 @@ public class ReservationDAOImpl implements ReservationDAO {
         return false;
     }
 
+    // ======================================================
+    // REPORT METHODS (EXCELLENT CRITERIA – DECISION SUPPORT)
+    // ======================================================
 
-    // ----------------------------------------
+    @Override
+    public List<Map<String, Object>> getMonthlyRevenue() {
+
+        List<Map<String, Object>> revenueList = new ArrayList<>();
+
+        String sql = """
+            SELECT YEAR(check_in) AS year,
+                   MONTH(check_in) AS month,
+                   SUM(total_amount) AS total_revenue
+            FROM reservation
+            GROUP BY YEAR(check_in), MONTH(check_in)
+            ORDER BY year DESC, month DESC
+        """;
+
+        try (Connection conn = DBUtil.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("year", rs.getInt("year"));
+                row.put("month", rs.getInt("month"));
+                row.put("totalRevenue", rs.getDouble("total_revenue"));
+                revenueList.add(row);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return revenueList;
+    }
+
+    @Override
+    public List<Map<String, Object>> getMonthlyOccupancy() {
+
+        List<Map<String, Object>> occupancyList = new ArrayList<>();
+
+        String sql = """
+            SELECT MONTH(check_in) AS month,
+                   COUNT(*) AS total_bookings
+            FROM reservation
+            GROUP BY MONTH(check_in)
+            ORDER BY month
+        """;
+
+        try (Connection conn = DBUtil.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            while (rs.next()) {
+                Map<String, Object> row = new HashMap<>();
+                row.put("month", rs.getInt("month"));
+                row.put("totalBookings", rs.getInt("total_bookings"));
+                occupancyList.add(row);
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return occupancyList;
+    }
+
+    @Override
+    public Map<String, Object> getMostBookedRoom() {
+
+        String sql = """
+            SELECT room_id, COUNT(*) AS total_bookings
+            FROM reservation
+            GROUP BY room_id
+            ORDER BY total_bookings DESC
+            LIMIT 1
+        """;
+
+        try (Connection conn = DBUtil.getInstance().getConnection();
+             PreparedStatement stmt = conn.prepareStatement(sql);
+             ResultSet rs = stmt.executeQuery()) {
+
+            if (rs.next()) {
+                Map<String, Object> result = new HashMap<>();
+                result.put("roomId", rs.getInt("room_id"));
+                result.put("totalBookings", rs.getInt("total_bookings"));
+                return result;
+            }
+
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+
+        return null;
+    }
+
+    // ============================
     // MAP RESULTSET TO OBJECT
-    // ----------------------------------------
+    // ============================
 
     private Reservation mapReservation(ResultSet rs) throws SQLException {
 

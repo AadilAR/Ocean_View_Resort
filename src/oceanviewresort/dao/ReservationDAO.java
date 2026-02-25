@@ -4,12 +4,13 @@ import oceanviewresort.model.Reservation;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
 
 public interface ReservationDAO {
 
     /**
      * Saves a reservation.
-     * @return true if saved successfully
+     * @return generated reservation ID
      */
     int save(Reservation reservation);
 
@@ -23,8 +24,14 @@ public interface ReservationDAO {
      */
     List<Reservation> findAll();
 
+    /**
+     * Finds reservations by contact number.
+     */
     List<Reservation> findByContactNumber(String contactNumber);
 
+    /**
+     * Deletes reservation by ID.
+     */
     boolean deleteById(int reservationId);
 
     /**
@@ -33,4 +40,23 @@ public interface ReservationDAO {
     boolean isRoomAvailable(int roomId,
                             LocalDate checkIn,
                             LocalDate checkOut);
+
+    // ==========================================
+    // REPORT METHODS (For Decision Making)
+    // ==========================================
+
+    /**
+     * Returns total revenue grouped by month.
+     */
+    List<Map<String, Object>> getMonthlyRevenue();
+
+    /**
+     * Returns total bookings grouped by month.
+     */
+    List<Map<String, Object>> getMonthlyOccupancy();
+
+    /**
+     * Returns the most booked room.
+     */
+    Map<String, Object> getMostBookedRoom();
 }
