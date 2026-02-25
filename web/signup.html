@@ -5,41 +5,51 @@
   <title>Ocean View Resort | Staff Registration</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
+    * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+    }
 
     body {
-        font-family: "Segoe UI", Arial, sans-serif;
+        font-family: 'Poppins', sans-serif;
         min-height: 100vh;
+        display: flex;
+        flex-direction: column;
+
         background-image: url('images/background.jpg');
         background-size: cover;
         background-position: center;
         background-attachment: fixed;
-        position: relative;
-        display: flex;
-        flex-direction: column;
     }
 
+    /* Dark overlay */
     body::before {
         content: "";
         position: fixed;
-        width: 100%;
-        height: 100%;
+        inset: 0;
         background: rgba(0,0,0,0.55);
-        backdrop-filter: blur(5px);
+        backdrop-filter: blur(6px);
         z-index: 0;
     }
 
+    /* Header */
     .header {
         position: relative;
         z-index: 1;
-        background: rgba(44,83,100,0.85);
-        padding: 20px;
+        background: rgba(44,83,100,0.9);
+        padding: 22px;
         text-align: center;
         color: white;
-        font-size: 26px;
-        font-weight: 600;
+        font-size: 28px;
+        font-weight: 700;
+        letter-spacing: 2px;
         text-transform: uppercase;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4);
     }
 
     .page-wrapper {
@@ -48,58 +58,106 @@
         justify-content: center;
         align-items: center;
         z-index: 1;
+        padding: 30px;
     }
 
     .container {
         width: 430px;
-        padding: 45px;
-        border-radius: 18px;
+        padding: 45px 40px;
+        border-radius: 20px;
+
         background: rgba(255,255,255,0.15);
         backdrop-filter: blur(18px);
+        -webkit-backdrop-filter: blur(18px);
+
         border: 1px solid rgba(255,255,255,0.25);
-        box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+
         color: white;
+        animation: fadeIn 0.4s ease-in-out;
     }
 
-    h2 { text-align: center; margin-bottom: 25px; }
+    h2 {
+        text-align: center;
+        margin-bottom: 30px;
+        font-weight: 600;
+    }
 
     label {
         display: block;
         margin-top: 14px;
         font-size: 14px;
+        font-weight: 500;
     }
 
     input, select {
         width: 100%;
-        padding: 12px;
-        border-radius: 12px;
-        border: none;
+        padding: 13px;
+        border-radius: 14px;
+        border: 1px solid rgba(255,255,255,0.3);
         margin-top: 6px;
-        background: rgba(255,255,255,0.18);
+        background: rgba(255,255,255,0.2);
         color: white;
+        font-size: 14px;
+        transition: all 0.3s ease;
+    }
+
+    input::placeholder {
+        color: rgba(255,255,255,0.7);
+    }
+
+    input:focus, select:focus {
+        border: 1px solid rgba(212,175,55,0.9);
+        box-shadow:
+            0 0 8px rgba(212,175,55,0.7),
+            0 0 18px rgba(212,175,55,0.4);
+        background: rgba(255,255,255,0.3);
+        outline: none;
     }
 
     button {
         width: 100%;
         padding: 14px;
-        border-radius: 14px;
+        border-radius: 16px;
         border: none;
-        margin-top: 18px;
+        margin-top: 24px;
+
         background: linear-gradient(135deg, #2c5364, #203a43);
         color: white;
         font-weight: 600;
+        font-size: 15px;
         cursor: pointer;
+        transition: 0.3s ease;
+    }
+
+    button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 25px rgba(0,0,0,0.5);
     }
 
     .back {
         text-align: center;
-        margin-top: 20px;
+        margin-top: 22px;
+        font-size: 14px;
     }
 
     .back a {
-        color: white;
+        color: #ffffff;
         text-decoration: none;
+        opacity: 0.8;
+        transition: 0.3s;
     }
+
+    .back a:hover {
+        opacity: 1;
+        text-decoration: underline;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(-10px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
   </style>
 </head>
 
@@ -114,16 +172,16 @@
     <form method="post" action="signup">
 
       <label>Username</label>
-      <input type="text" name="username" required minlength="3">
+      <input type="text" name="username" required minlength="3" placeholder="Enter username">
 
       <label>Email</label>
-      <input type="email" name="email" required>
+      <input type="email" name="email" required placeholder="Enter email address">
 
       <label>Password</label>
-      <input type="password" name="password" required minlength="6">
+      <input type="password" name="password" required minlength="6" placeholder="Enter password">
 
       <label>Confirm Password</label>
-      <input type="password" name="confirmPassword" required>
+      <input type="password" name="confirmPassword" required placeholder="Confirm password">
 
       <label>Role</label>
       <select name="role" required>
