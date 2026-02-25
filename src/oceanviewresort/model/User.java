@@ -4,20 +4,36 @@ public class User {
 
     private int userId;
     private String username;
+    private String email;
     private String password;
     private String role;
-    private String securityQuestion;
-    private String securityAnswer;
+
+    // Email verification
+    private boolean verified;
+    private String verificationToken;
+
+    // =============================
+    // Constructors
+    // =============================
 
     public User() {
     }
 
-    public User(int userId, String username,
-                String password, String role) {
+    public User(int userId,
+                String username,
+                String email,
+                String password,
+                String role,
+                boolean verified,
+                String verificationToken) {
+
         this.userId = userId;
         this.username = username;
+        this.email = email;
         this.password = password;
         this.role = role;
+        this.verified = verified;
+        this.verificationToken = verificationToken;
     }
 
     // =============================
@@ -40,10 +56,19 @@ public class User {
         this.username = username;
     }
 
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
     public String getPassword() {
         return password;
     }
 
+    // ⚠️ Ideally hash before storing
     public void setPassword(String password) {
         this.password = password;
     }
@@ -56,19 +81,19 @@ public class User {
         this.role = role;
     }
 
-    public String getSecurityQuestion() {
-        return securityQuestion;
+    public boolean isVerified() {
+        return verified;
     }
 
-    public void setSecurityQuestion(String securityQuestion) {
-        this.securityQuestion = securityQuestion;
+    public void setVerified(boolean verified) {
+        this.verified = verified;
     }
 
-    public String getSecurityAnswer() {
-        return securityAnswer;
+    public String getVerificationToken() {
+        return verificationToken;
     }
 
-    public void setSecurityAnswer(String securityAnswer) {
-        this.securityAnswer = securityAnswer;
+    public void setVerificationToken(String verificationToken) {
+        this.verificationToken = verificationToken;
     }
 }

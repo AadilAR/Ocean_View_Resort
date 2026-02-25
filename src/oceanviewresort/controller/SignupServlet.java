@@ -19,25 +19,26 @@ public class SignupServlet extends HttpServlet {
                           HttpServletResponse response)
             throws IOException {
 
-        String username        = trim(request.getParameter("username"));
-        String password        = trim(request.getParameter("password"));
-        String confirmPassword = trim(request.getParameter("confirmPassword"));
-        String role            = trim(request.getParameter("role"));
-        String securityQuestion =
-                trim(request.getParameter("securityQuestion"));
-        String securityAnswer  =
-                trim(request.getParameter("securityAnswer"));
+        String username        = getTrimmed(request.getParameter("username"));
+        String email           = getTrimmed(request.getParameter("email"));
+        String password        = getTrimmed(request.getParameter("password"));
+        String confirmPassword = getTrimmed(request.getParameter("confirmPassword"));
+        String role            = getTrimmed(request.getParameter("role"));
 
         // =============================
         // VALIDATION
         // =============================
 
-        if (isBlank(username)
+        if (isBlank(username) || isBlank(email)
                 || isBlank(password) || isBlank(confirmPassword)
-                || isBlank(role) || isBlank(securityQuestion)
-                || isBlank(securityAnswer)) {
+                || isBlank(role)) {
 
             redirect(response, request, SIGNUP_PAGE + "?error=empty");
+            return;
+        }
+
+        if (!isValidEmail(email)) {
+            redirect(response, request, SIGNUP_PAGE + "?error=invalidEmail");
             return;
         }
 
@@ -62,41 +63,47 @@ public class SignupServlet extends HttpServlet {
 
         try {
 
-            boolean registered = authService
-                    .register(username, password,
-                              role.toUpperCase(),
-                              securityQuestion, securityAnswer);
+            boolean registered = authService.register(
+                    username,
+                    email,
+                    password,
+                    role.toUpperCase()
+            );
 
             if (registered) {
                 redirect(response, request,
-                        LOGIN_PAGE + "?success=registered");
+                        LOGIN_PAGE + "?success=verifyEmail");
             } else {
                 redirect(response, request,
                         SIGNUP_PAGE + "?error=exists");
             }
 
         } catch (Exception e) {
-            e.printStackTrace(); // replace with logger later
+            e.printStackTrace();
             redirect(response, request,
                     SIGNUP_PAGE + "?error=server");
         }
     }
 
     // =====================================
-    // Utility Methods
+    // Helper Methods
     // =====================================
 
-    private String trim(String value) {
+    private String getTrimmed(String value) {
         return value == null ? null : value.trim();
     }
 
     private boolean isBlank(String value) {
-        return value == null || value.trim().isEmpty();
+        return value == null || value.isEmpty();
     }
 
     private boolean isValidRole(String role) {
         return "STAFF".equalsIgnoreCase(role)
                 || "ADMIN".equalsIgnoreCase(role);
+    }
+
+    private boolean isValidEmail(String email) {
+        return email.matches("^[A-Za-z0-9+_.-]+@(.+)$");
     }
 
     private void redirect(HttpServletResponse response,

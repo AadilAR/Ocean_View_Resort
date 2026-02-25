@@ -4,19 +4,17 @@ import oceanviewresort.model.User;
 
 public interface UserDAO {
 
-    /**
-     * Find a user by username.
-     * @param username the username
-     * @return User object if found, otherwise null
-     */
     User findByUsername(String username);
 
-    /**
-     * Save a new user to the database.
-     * @param user the user entity
-     * @return true if saved successfully, false otherwise
-     */
+    User findByEmail(String email);
+
     boolean addUser(User user);
+
+    boolean verifyUser(int userId);
+
+    User findByVerificationToken(String token);
+
+    boolean saveResetToken(int userId, String token);
 
     void updatePassword(int userId, String newPassword);
 }

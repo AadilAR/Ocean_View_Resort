@@ -31,27 +31,32 @@ public class LoginServlet extends HttpServlet {
 
         User user = authService.authenticate(username, password);
 
-        if (user != null) {
-
-            // Invalidate old session (security best practice)
-            HttpSession oldSession = request.getSession(false);
-            if (oldSession != null) {
-                oldSession.invalidate();
-            }
-
-            // Create new session
-            HttpSession session = request.getSession(true);
-            session.setAttribute("loggedUser", user);
-            session.setAttribute("role", user.getRole());
-
-            // Optional: session timeout (30 minutes)
-            session.setMaxInactiveInterval(30 * 60);
-
-            redirect(response, request, RESERVATION_PAGE);
-
-        } else {
+        if (user == null) {
             redirect(response, request, LOGIN_PAGE + "?error=invalid");
+            return;
         }
+
+        // Check if account is verified
+        if (!user.isVerified()) {
+            redirect(response, request, LOGIN_PAGE + "?error=unverified");
+            return;
+        }
+
+        // Invalidate old session (security best practice)
+        HttpSession oldSession = request.getSession(false);
+        if (oldSession != null) {
+            oldSession.invalidate();
+        }
+
+        // Create new session
+        HttpSession session = request.getSession(true);
+        session.setAttribute("loggedUser", user);
+        session.setAttribute("role", user.getRole());
+
+        // 30-minute session timeout
+        session.setMaxInactiveInterval(30 * 60);
+
+        redirect(response, request, RESERVATION_PAGE);
     }
 
     @Override

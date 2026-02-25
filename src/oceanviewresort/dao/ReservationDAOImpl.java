@@ -60,7 +60,7 @@ public class ReservationDAOImpl implements ReservationDAO {
             VALUES (?, ?, ?, ?, ?, ?, ?)
             """;
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt =
                      conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
@@ -94,7 +94,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public Reservation findById(int reservationId) {
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ID)) {
 
             stmt.setInt(1, reservationId);
@@ -121,7 +121,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
         List<Reservation> reservations = new ArrayList<>();
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_ALL);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -145,7 +145,7 @@ public class ReservationDAOImpl implements ReservationDAO {
                                    LocalDate checkIn,
                                    LocalDate checkOut) {
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(CHECK_AVAILABILITY_SQL)) {
 
             stmt.setInt(1, roomId);
@@ -174,7 +174,7 @@ public class ReservationDAOImpl implements ReservationDAO {
 
         List<Reservation> reservations = new ArrayList<>();
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_CONTACT)) {
 
             stmt.setString(1, contactNumber);
@@ -199,7 +199,7 @@ public class ReservationDAOImpl implements ReservationDAO {
     @Override
     public boolean deleteById(int reservationId) {
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(DELETE_SQL)) {
 
             stmt.setInt(1, reservationId);

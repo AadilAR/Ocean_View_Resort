@@ -21,7 +21,7 @@ public class RoomDAOImpl implements RoomDAO {
     @Override
     public Room getRoomById(int roomId) {
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(SELECT_BY_ID)) {
 
             stmt.setInt(1, roomId);
@@ -47,7 +47,7 @@ public class RoomDAOImpl implements RoomDAO {
 
         String sql = "SELECT room_id, room_type, price_per_night FROM room";
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql);
              ResultSet rs = stmt.executeQuery()) {
 
@@ -73,7 +73,7 @@ public class RoomDAOImpl implements RoomDAO {
 
         String sql = "SELECT price_per_night FROM room WHERE room_id = ?";
 
-        try (Connection conn = DBUtil.getConnection();
+        try (Connection conn = DBUtil.getInstance().getConnection();
              PreparedStatement stmt = conn.prepareStatement(sql)) {
 
             stmt.setInt(1, roomId);

@@ -6,16 +6,11 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <style>
-    * {
-        box-sizing: border-box;
-        margin: 0;
-        padding: 0;
-    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
 
     body {
         font-family: "Segoe UI", Arial, sans-serif;
         min-height: 100vh;
-
         background-image: url('images/background.jpg');
         background-size: cover;
         background-position: center;
@@ -25,7 +20,6 @@
         flex-direction: column;
     }
 
-    /* Dark overlay */
     body::before {
         content: "";
         position: fixed;
@@ -36,70 +30,41 @@
         z-index: 0;
     }
 
-    /* ================= HEADER ================= */
-
     .header {
         position: relative;
         z-index: 1;
         background: rgba(44,83,100,0.85);
-        backdrop-filter: blur(10px);
-        padding: 20px 40px;
+        padding: 20px;
         text-align: center;
         color: white;
         font-size: 26px;
         font-weight: 600;
-        letter-spacing: 2px;
         text-transform: uppercase;
-        box-shadow: 0 6px 20px rgba(0,0,0,0.4);
     }
-
-    .brand-title {
-        background: linear-gradient(90deg, #ffffff, #d4af37);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-    }
-
-    /* ================= CONTAINER ================= */
 
     .page-wrapper {
         flex: 1;
         display: flex;
         justify-content: center;
         align-items: center;
-        position: relative;
         z-index: 1;
-        padding: 40px 0;
     }
 
     .container {
         width: 430px;
         padding: 45px;
         border-radius: 18px;
-
         background: rgba(255,255,255,0.15);
         backdrop-filter: blur(18px);
-        -webkit-backdrop-filter: blur(18px);
-
         border: 1px solid rgba(255,255,255,0.25);
         box-shadow: 0 15px 40px rgba(0,0,0,0.4);
         color: white;
-
-        animation: fadeIn 0.4s ease-in-out;
     }
 
-    h2 {
-        text-align: center;
-        margin-bottom: 25px;
-        font-weight: 600;
-        letter-spacing: 1px;
-    }
-
-    /* ================= FORM ================= */
+    h2 { text-align: center; margin-bottom: 25px; }
 
     label {
-        font-weight: 500;
         display: block;
-        margin-bottom: 6px;
         margin-top: 14px;
         font-size: 14px;
     }
@@ -109,74 +74,22 @@
         padding: 12px;
         border-radius: 12px;
         border: none;
-        outline: none;
-        font-size: 14px;
-
-        background: rgba(255,255,255,0.18);
-        color: white;
-        transition: 0.3s ease;
-    }
-
-    input::placeholder {
-        color: rgba(255,255,255,0.75);
-    }
-
-    select {
-        appearance: none;
+        margin-top: 6px;
         background: rgba(255,255,255,0.18);
         color: white;
     }
-
-    select option {
-        color: black;
-    }
-
-    input:focus, select:focus {
-        box-shadow: 0 0 14px rgba(255,255,255,0.7);
-        background: rgba(255,255,255,0.28);
-    }
-
-    .password-wrapper {
-        position: relative;
-    }
-
-    .toggle-password {
-        position: absolute;
-        right: 12px;
-        top: 35%;
-        cursor: pointer;
-        font-size: 12px;
-        color: #ffffff;
-        opacity: 0.8;
-    }
-
-    .toggle-password:hover {
-        opacity: 1;
-    }
-
-    /* ================= BUTTON ================= */
 
     button {
         width: 100%;
         padding: 14px;
         border-radius: 14px;
         border: none;
-        font-size: 15px;
-        cursor: pointer;
-        font-weight: 600;
-        margin-top: 10px;
-
+        margin-top: 18px;
         background: linear-gradient(135deg, #2c5364, #203a43);
         color: white;
-        transition: 0.3s ease;
+        font-weight: 600;
+        cursor: pointer;
     }
-
-    button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 10px 25px rgba(0,0,0,0.4);
-    }
-
-    /* ================= BACK LINK ================= */
 
     .back {
         text-align: center;
@@ -184,79 +97,33 @@
     }
 
     .back a {
-        text-decoration: none;
-        color: #ffffff;
-        font-size: 14px;
-        opacity: 0.85;
-    }
-
-    .back a:hover {
-        opacity: 1;
-    }
-
-    /* ================= HELP BUTTON ================= */
-
-    .help-btn {
-        position: fixed;
-        bottom: 25px;
-        right: 25px;
-        width: 55px;
-        height: 55px;
-        background: linear-gradient(135deg, #2c5364, #1e3c50);
         color: white;
-        font-size: 24px;
-        font-weight: bold;
-        text-align: center;
-        line-height: 55px;
-        border-radius: 50%;
         text-decoration: none;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-        transition: 0.3s ease;
-        z-index: 999;
-    }
-
-    .help-btn:hover {
-        transform: scale(1.1);
-    }
-
-    /* Animation */
-    @keyframes fadeIn {
-        from { opacity: 0; transform: translateY(-10px); }
-        to { opacity: 1; transform: translateY(0); }
     }
   </style>
 </head>
+
 <body>
 
-<div class="header">
-  <span class="brand-title">Ocean View Resort</span>
-</div>
+<div class="header">Ocean View Resort</div>
 
 <div class="page-wrapper">
   <div class="container">
-
     <h2>Staff Registration</h2>
 
     <form method="post" action="signup">
 
       <label>Username</label>
-      <input type="text" name="username" required minlength="3" placeholder="Enter username">
+      <input type="text" name="username" required minlength="3">
+
+      <label>Email</label>
+      <input type="email" name="email" required>
 
       <label>Password</label>
-      <div class="password-wrapper">
-        <input type="password" name="password" id="password"
-               required minlength="6" placeholder="Minimum 6 characters">
-        <span class="toggle-password"
-              onclick="togglePassword('password')">Show</span>
-      </div>
+      <input type="password" name="password" required minlength="6">
 
       <label>Confirm Password</label>
-      <div class="password-wrapper">
-        <input type="password" name="confirmPassword"
-               id="confirmPassword" required placeholder="Re-enter password">
-        <span class="toggle-password"
-              onclick="togglePassword('confirmPassword')">Show</span>
-      </div>
+      <input type="password" name="confirmPassword" required>
 
       <label>Role</label>
       <select name="role" required>
@@ -264,23 +131,6 @@
         <option value="STAFF">Staff</option>
         <option value="ADMIN">Admin</option>
       </select>
-
-      <label>Security Question</label>
-      <select name="securityQuestion" required>
-        <option value="">Select a question</option>
-        <option value="What is your favorite color?">
-          What is your favorite color?
-        </option>
-        <option value="What is your mother's maiden name?">
-          What is your mother's maiden name?
-        </option>
-        <option value="What city were you born in?">
-          What city were you born in?
-        </option>
-      </select>
-
-      <label>Security Answer</label>
-      <input type="text" name="securityAnswer" required placeholder="Enter answer">
 
       <button type="submit">Create Account</button>
     </form>
@@ -291,15 +141,6 @@
 
   </div>
 </div>
-
-<a href="help" class="help-btn">?</a>
-
-<script>
-  function togglePassword(fieldId) {
-      const field = document.getElementById(fieldId);
-      field.type = field.type === "password" ? "text" : "password";
-  }
-</script>
 
 </body>
 </html>
