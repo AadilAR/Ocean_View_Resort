@@ -74,8 +74,9 @@ public class SignupServlet extends HttpServlet {
                 redirect(response, request,
                         LOGIN_PAGE + "?success=verifyEmail");
             } else {
-                redirect(response, request,
-                        SIGNUP_PAGE + "?error=exists");
+                request.setAttribute("message", "Existing email");
+                request.setAttribute("type", "error");
+                request.getRequestDispatcher("/message.jsp").forward(request, response);
             }
 
         } catch (Exception e) {

@@ -2,6 +2,7 @@ package oceanviewresort.controller;
 
 import oceanviewresort.service.AuthService;
 
+import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
 import java.io.IOException;
@@ -9,15 +10,12 @@ import java.io.IOException;
 @WebServlet("/verify")
 public class VerifyServlet extends HttpServlet {
 
-    private static final String LOGIN_PAGE = "/login.html";
-    private static final String SIGNUP_PAGE = "/signup.html";
-
     private final AuthService authService = new AuthService();
 
     @Override
     protected void doGet(HttpServletRequest request,
                          HttpServletResponse response)
-            throws IOException {
+            throws IOException, ServletException {
 
         String token = getTrimmed(request.getParameter("token"));
 
@@ -25,8 +23,9 @@ public class VerifyServlet extends HttpServlet {
         // Validate Token
         // =============================
         if (isBlank(token)) {
-            redirect(response, request,
-                    SIGNUP_PAGE + "?error=invalidToken");
+            showMessage(request, response,
+                    "Invalid or expired token.",
+                    "error");
             return;
         }
 
@@ -35,17 +34,20 @@ public class VerifyServlet extends HttpServlet {
             boolean verified = authService.verifyAccount(token);
 
             if (verified) {
-                redirect(response, request,
-                        LOGIN_PAGE + "?success=verified");
+                showMessage(request, response,
+                        "Account successfully verified.",
+                        "success");
             } else {
-                redirect(response, request,
-                        SIGNUP_PAGE + "?error=invalidOrExpired");
+                showMessage(request, response,
+                        "Invalid or expired token.",
+                        "error");
             }
 
         } catch (Exception e) {
             e.printStackTrace(); // Replace with logger later
-            redirect(response, request,
-                    SIGNUP_PAGE + "?error=server");
+            showMessage(request, response,
+                    "Server error. Please try again later.",
+                    "error");
         }
     }
 
@@ -53,18 +55,23 @@ public class VerifyServlet extends HttpServlet {
     // Helper Methods
     // =============================
 
+    private void showMessage(HttpServletRequest request,
+                             HttpServletResponse response,
+                             String message,
+                             String type)
+            throws ServletException, IOException {
+
+        request.setAttribute("message", message);
+        request.setAttribute("type", type);
+        request.getRequestDispatcher("/message.jsp")
+                .forward(request, response);
+    }
+
     private String getTrimmed(String value) {
         return value == null ? null : value.trim();
     }
 
     private boolean isBlank(String value) {
         return value == null || value.isEmpty();
-    }
-
-    private void redirect(HttpServletResponse response,
-                          HttpServletRequest request,
-                          String path) throws IOException {
-
-        response.sendRedirect(request.getContextPath() + path);
     }
 }

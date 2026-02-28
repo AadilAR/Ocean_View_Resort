@@ -17,4 +17,6 @@ public interface UserDAO {
     boolean saveResetToken(int userId, String token);
 
     void updatePassword(int userId, String newPassword);
+
+
 }

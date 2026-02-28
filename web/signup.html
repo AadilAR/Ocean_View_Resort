@@ -200,5 +200,16 @@
   </div>
 </div>
 
+<p id="errorMessage" style="color:red; font-weight:bold;"></p>
+
+<script>
+  const params = new URLSearchParams(window.location.search);
+  const error = params.get("error");
+
+  if (error === "exists") {
+      document.getElementById("errorMessage").innerText = "Existing email";
+  }
+</script>
+
 </body>
 </html>
