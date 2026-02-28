@@ -30,7 +30,7 @@ public class ReservationServlet extends HttpServlet {
             throws IOException {
 
         if (!isLoggedIn(request)) {
-            redirect(response, request, LOGIN_PAGE);
+            response.sendRedirect(request.getContextPath() + "/login.html");
             return;
         }
 
@@ -59,7 +59,7 @@ public class ReservationServlet extends HttpServlet {
             throws IOException {
 
         if (!isLoggedIn(request)) {
-            redirect(response, request, LOGIN_PAGE);
+            response.sendRedirect(request.getContextPath() + "/login.html");
             return;
         }
 
@@ -780,6 +780,7 @@ public class ReservationServlet extends HttpServlet {
     private void redirect(HttpServletResponse response,
                           HttpServletRequest request,
                           String path) throws IOException {
+
         response.sendRedirect(request.getContextPath() + path);
     }
 }
