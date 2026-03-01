@@ -22,24 +22,24 @@ public class ReservationDAOImpl implements ReservationDAO {
     private static final String TABLE = "reservation";
 
     private static final String INSERT_SQL = """
-            INSERT INTO reservation
-            (guest_name, address, contact_number,
-             room_id, check_in, check_out, total_amount)
-            VALUES (?, ?, ?, ?, ?, ?, ?)
-            """;
+        INSERT INTO reservation
+        (guest_name, address, contact_number, email,
+         room_id, check_in, check_out, total_amount)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """;
 
     private static final String SELECT_BY_ID =
-            "SELECT reservation_id, guest_name, address, contact_number, " +
+            "SELECT reservation_id, guest_name, address, contact_number, email, " +
                     "room_id, check_in, check_out, total_amount " +
                     "FROM reservation WHERE reservation_id = ?";
 
     private static final String SELECT_ALL =
-            "SELECT reservation_id, guest_name, address, contact_number, " +
+            "SELECT reservation_id, guest_name, address, contact_number, email, " +
                     "room_id, check_in, check_out, total_amount " +
                     "FROM reservation";
 
     private static final String SELECT_BY_CONTACT =
-            "SELECT reservation_id, guest_name, address, contact_number, " +
+            "SELECT reservation_id, guest_name, address, contact_number, email, " +
                     "room_id, check_in, check_out, total_amount " +
                     "FROM reservation WHERE contact_number = ?";
 
@@ -68,10 +68,11 @@ public class ReservationDAOImpl implements ReservationDAO {
             stmt.setString(1, reservation.getGuestName());
             stmt.setString(2, reservation.getAddress());
             stmt.setString(3, reservation.getContactNumber());
-            stmt.setInt(4, reservation.getRoom().getRoomId());
-            stmt.setDate(5, Date.valueOf(reservation.getCheckInDate()));
-            stmt.setDate(6, Date.valueOf(reservation.getCheckOutDate()));
-            stmt.setDouble(7, reservation.getTotalAmount());
+            stmt.setString(4, reservation.getEmail()); // ✅ NEW
+            stmt.setInt(5, reservation.getRoom().getRoomId());
+            stmt.setDate(6, Date.valueOf(reservation.getCheckInDate()));
+            stmt.setDate(7, Date.valueOf(reservation.getCheckOutDate()));
+            stmt.setDouble(8, reservation.getTotalAmount());
 
             stmt.executeUpdate();
 
@@ -323,6 +324,7 @@ public class ReservationDAOImpl implements ReservationDAO {
         reservation.setGuestName(rs.getString("guest_name"));
         reservation.setAddress(rs.getString("address"));
         reservation.setContactNumber(rs.getString("contact_number"));
+        reservation.setEmail(rs.getString("email"));
         reservation.setRoom(room);
         reservation.setCheckInDate(rs.getDate("check_in").toLocalDate());
         reservation.setCheckOutDate(rs.getDate("check_out").toLocalDate());

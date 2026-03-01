@@ -1,6 +1,7 @@
 package oceanviewresort.controller;
 
 import oceanviewresort.model.Reservation;
+import oceanviewresort.model.User;
 import oceanviewresort.service.*;
 import oceanviewresort.dao.RoomDAO;
 import oceanviewresort.dao.RoomDAOImpl;
@@ -60,13 +61,10 @@ public class BillServlet extends HttpServlet {
         // Strategy Pattern Selection
         // ==========================
 
-        BillingStrategy strategy;
-
-        if (nights > 5) {
-            strategy = new DiscountBillingStrategy();
-        } else {
-            strategy = new StandardBillingStrategy();
-        }
+        BillingStrategy strategy =
+                (nights > 5)
+                        ? new DiscountBillingStrategy()
+                        : new StandardBillingStrategy();
 
         BillingService billingService =
                 new BillingService(strategy);
@@ -81,7 +79,49 @@ public class BillServlet extends HttpServlet {
         DecimalFormat df = new DecimalFormat("#,##0.00");
 
         // ==========================
-        // Generate Invoice HTML
+// SEND EMAIL (ONLY ONCE)
+// ==========================
+
+        HttpSession session = request.getSession();
+
+        if (reservation.getEmail() != null &&
+                !reservation.getEmail().isEmpty() &&
+                session.getAttribute("invoiceSent_" + id) == null) {
+
+            EmailService emailService = new SmtpEmailService();
+
+            String emailMessage =
+                    "<h2>Ocean View Resort - Invoice</h2>" +
+                            "<p><b>Invoice #:</b> " + reservation.getReservationId() + "</p>" +
+                            "<p><b>Date:</b> " + LocalDate.now() + "</p>" +
+                            "<hr>" +
+                            "<p><b>Guest:</b> " + reservation.getGuestName() + "</p>" +
+                            "<p><b>Room ID:</b> " + roomId + "</p>" +
+                            "<p><b>Check-In:</b> " + checkIn + "</p>" +
+                            "<p><b>Check-Out:</b> " + checkOut + "</p>" +
+                            "<p><b>Total Nights:</b> " + nights + "</p>" +
+                            "<p><b>Subtotal:</b> LKR " + df.format(subtotal) + "</p>";
+
+            if (discountAmount > 0) {
+                emailMessage += "<p><b>Discount (10%):</b> - LKR "
+                        + df.format(discountAmount) + "</p>";
+            }
+
+            emailMessage += "<h3>Total Amount: LKR "
+                    + df.format(totalAmount) + "</h3>" +
+                    "<p>Thank you for staying with Ocean View Resort!</p>";
+
+            emailService.sendBillReceipt(
+                    reservation.getEmail(),   // ✅ NOW SENDS TO GUEST
+                    "Ocean View Resort Invoice #" + reservation.getReservationId(),
+                    emailMessage
+            );
+
+            session.setAttribute("invoiceSent_" + id, true);
+        }
+
+        // ==========================
+        // Generate Invoice HTML Page
         // ==========================
 
         response.setContentType("text/html;charset=UTF-8");
@@ -163,13 +203,11 @@ public class BillServlet extends HttpServlet {
         out.println("<tr><td>Check-Out</td><td class='currency'>" + checkOut + "</td></tr>");
         out.println("<tr><td>Total Nights</td><td class='currency'>" + nights + "</td></tr>");
 
-        // Subtotal
         out.println("<tr>");
         out.println("<td>Subtotal</td>");
         out.println("<td class='currency'>LKR " + df.format(subtotal) + "</td>");
         out.println("</tr>");
 
-        // Show discount only if applied
         if (discountAmount > 0) {
             out.println("<tr>");
             out.println("<td>Discount (10%)</td>");
@@ -177,14 +215,12 @@ public class BillServlet extends HttpServlet {
             out.println("</tr>");
         }
 
-        // Final Total
         out.println("<tr class='total-row'>");
         out.println("<td>Total Amount</td>");
         out.println("<td class='currency'>LKR " + df.format(totalAmount) + "</td>");
         out.println("</tr>");
 
         out.println("</table>");
-
         out.println("<button class='print-btn' onclick='window.print()'>Print Invoice</button>");
         out.println("</div></body></html>");
     }

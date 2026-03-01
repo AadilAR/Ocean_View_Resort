@@ -8,6 +8,7 @@ public class Reservation {
     private String guestName;
     private String address;
     private String contactNumber;
+    private String email;
     private Room room;
     private LocalDate checkInDate;
     private LocalDate checkOutDate;
@@ -61,6 +62,10 @@ public class Reservation {
     public void setContactNumber(String contactNumber) {
         this.contactNumber = contactNumber;
     }
+
+    public String getEmail() { return email; }
+
+    public void setEmail(String email) { this.email = email; }
 
     public Room getRoom() {
         return room;

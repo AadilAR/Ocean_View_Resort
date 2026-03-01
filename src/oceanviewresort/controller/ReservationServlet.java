@@ -4,7 +4,9 @@ import oceanviewresort.dao.RoomDAO;
 import oceanviewresort.dao.RoomDAOImpl;
 import oceanviewresort.model.Reservation;
 import oceanviewresort.model.Room;
+import oceanviewresort.service.EmailService;
 import oceanviewresort.service.ReservationService;
+import oceanviewresort.service.SmtpEmailService;
 
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.*;
@@ -112,10 +114,8 @@ public class ReservationServlet extends HttpServlet {
                     reservationService.createReservation(reservation);
 
             if (reservationId > 0) {
-
                 response.sendRedirect(request.getContextPath()
                         + "/bill?reservationId=" + reservationId);
-
             } else {
 
                 response.sendRedirect(request.getContextPath()
@@ -351,6 +351,7 @@ public class ReservationServlet extends HttpServlet {
         out.println("<input type='text' name='guestName' placeholder='Guest Name' required>");
         out.println("<input type='text' name='address' placeholder='Address'>");
         out.println("<input type='text' name='contactNumber' placeholder='Contact Number' required>");
+        out.println("<input type='email' name='email' placeholder='Email Address' required>");
         out.println("<input type='number' name='roomId' placeholder='Room ID' required>");
         out.println("<input type='date' name='checkIn' required>");
         out.println("<input type='date' name='checkOut' required>");
@@ -362,6 +363,9 @@ public class ReservationServlet extends HttpServlet {
         }
 
         out.println("</form>");
+        out.println("<a class='back' href='"
+                + request.getContextPath()
+                + "/reservation.html'>← Back to Dashboard</a>");
         out.println("</div>");
 
         // -------- RIGHT ROOM TABLE --------
@@ -563,7 +567,7 @@ public class ReservationServlet extends HttpServlet {
 
         out.println("<a class='back' href='"
                 + request.getContextPath()
-                + "/reserve'>← Back to Reservation</a>");
+                + "/reservation.html'>← Back to Dashboard</a>");
 
         out.println("</div>");
         out.println("<a href='help' class='help-btn'>?</a>");
@@ -581,155 +585,173 @@ public class ReservationServlet extends HttpServlet {
         response.setContentType("text/html;charset=UTF-8");
         var out = response.getWriter();
 
+        String currentSearch = request.getParameter("search");
+        if (currentSearch == null) currentSearch = "";
+
         out.println("""
-    <html>
-    <head>
-        <title>Reservations</title>
-        <style>
-            * {
-                box-sizing: border-box;
-            }
+<html>
+<head>
+    <title>Reservations</title>
+    <style>
+        * { box-sizing: border-box; }
 
-            body {
-                margin: 0;
-                font-family: "Segoe UI", Arial, sans-serif;
-                background-image: url('images/background.jpg');
-                background-size: cover;
-                background-position: center;
-                background-attachment: fixed;
-                position: relative;
-            }
+        body {
+            margin: 0;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background-image: url('images/background.jpg');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            position: relative;
+        }
 
-            /* Dark overlay */
-            body::before {
-                content: "";
-                position: fixed;
-                width: 100%;
-                height: 100%;
-                background: rgba(0,0,0,0.55);
-                backdrop-filter: blur(4px);
-                z-index: 0;
-            }
+        body::before {
+            content: "";
+            position: fixed;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.55);
+            backdrop-filter: blur(4px);
+            z-index: 0;
+        }
 
-            .header {
-                position: relative;
-                z-index: 1;
-                text-align: center;
-                padding: 25px;
-                font-size: 28px;
-                font-weight: 700;
-                letter-spacing: 2px;
-                background: linear-gradient(90deg, #ffffff, #d4af37);
-                -webkit-background-clip: text;
-                -webkit-text-fill-color: transparent;
-            }
+        .header {
+            position: relative;
+            z-index: 1;
+            text-align: center;
+            padding: 25px;
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            background: linear-gradient(90deg, #ffffff, #d4af37);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
 
-            .container {
-                position: relative;
-                z-index: 1;
-                max-width: 1100px;
-                margin: 60px auto;
-                padding: 35px;
-                border-radius: 18px;
+        .container {
+            position: relative;
+            z-index: 1;
+            max-width: 1100px;
+            margin: 60px auto;
+            padding: 35px;
+            border-radius: 18px;
+            background: rgba(255,255,255,0.15);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(255,255,255,0.25);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+            color: white;
+        }
 
-                background: rgba(255,255,255,0.15);
-                backdrop-filter: blur(18px);
-                -webkit-backdrop-filter: blur(18px);
-                border: 1px solid rgba(255,255,255,0.25);
-                box-shadow: 0 15px 40px rgba(0,0,0,0.4);
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: 600;
+        }
 
-                color: white;
-            }
+        .search-form {
+            text-align: center;
+            margin-bottom: 25px;
+        }
 
-            h2 {
-                text-align: center;
-                margin-bottom: 25px;
-                font-weight: 600;
-            }
+        .search-form input {
+            padding: 8px;
+            border-radius: 6px;
+            border: none;
+            width: 250px;
+        }
 
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
+        .search-form button {
+            padding: 8px 15px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #2c5364, #203a43);
+            color: white;
+            margin-left: 5px;
+        }
 
-            th, td {
-                padding: 12px;
-                text-align: center;
-                border: 1px solid rgba(255,255,255,0.3);
-            }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-            th {
-                background: rgba(44,83,100,0.9);
-                color: white;
-            }
+        th, td {
+            padding: 12px;
+            text-align: center;
+            border: 1px solid rgba(255,255,255,0.3);
+        }
 
-            td {
-                background: rgba(255,255,255,0.08);
-            }
+        th {
+            background: rgba(44,83,100,0.9);
+            color: white;
+        }
 
-            tr:hover td {
-                background: rgba(255,255,255,0.15);
-                transition: 0.3s ease;
-            }
+        td {
+            background: rgba(255,255,255,0.08);
+        }
 
-            .back {
-                display: inline-block;
-                margin-top: 25px;
-                padding: 10px 18px;
-                border-radius: 8px;
-                background: linear-gradient(135deg, #2c5364, #203a43);
-                color: white;
-                text-decoration: none;
-                font-weight: 500;
-                transition: 0.3s ease;
-            }
+        tr:hover td {
+            background: rgba(255,255,255,0.15);
+            transition: 0.3s ease;
+        }
 
-            .back:hover {
-                transform: translateY(-2px);
-                box-shadow: 0 8px 20px rgba(0,0,0,0.4);
-            }
+        .back {
+            display: inline-block;
+            margin-top: 25px;
+            padding: 10px 18px;
+            border-radius: 8px;
+            background: linear-gradient(135deg, #2c5364, #203a43);
+            color: white;
+            text-decoration: none;
+            font-weight: 500;
+        }
 
-            .help-btn {
-                position: fixed;
-                bottom: 25px;
-                right: 25px;
-                width: 55px;
-                height: 55px;
-                background: linear-gradient(135deg, #2c5364, #1e3c50);
-                color: white;
-                font-size: 24px;
-                font-weight: bold;
-                text-align: center;
-                line-height: 55px;
-                border-radius: 50%;
-                text-decoration: none;
-                box-shadow: 0 6px 18px rgba(0,0,0,0.4);
-                z-index: 999;
-            }
-
-            .help-btn:hover {
-                transform: scale(1.1);
-            }
-        </style>
-    </head>
-    <body>
-        <div class="header">Ocean View Resort</div>
-        <div class="container">
-    """);
+        .help-btn {
+            position: fixed;
+            bottom: 25px;
+            right: 25px;
+            width: 55px;
+            height: 55px;
+            background: linear-gradient(135deg, #2c5364, #1e3c50);
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            line-height: 55px;
+            border-radius: 50%;
+            text-decoration: none;
+            box-shadow: 0 6px 18px rgba(0,0,0,0.4);
+            z-index: 999;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">Ocean View Resort</div>
+    <div class="container">
+""");
 
         out.println("<h2>" + title + "</h2>");
 
+        // ✅ SEARCH FORM
+        out.println("<div class='search-form'>");
+        out.println("<form method='get' action='" + request.getContextPath() + "/reserve'>");
+        out.println("<input type='text' name='search' value='" + currentSearch + "' placeholder='Search by Mobile Number'>");
+        out.println("<button type='submit'>Search</button>");
+        out.println("</form>");
+        out.println("</div>");
+
         if (results.isEmpty()) {
-            out.println("<p>No reservations found.</p>");
+            out.println("<p style='text-align:center;'>No reservations found.</p>");
         } else {
             out.println("<table>");
-            out.println("<tr><th>ID</th><th>Guest</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Total</th></tr>");
+            out.println("<tr><th>ID</th><th>Guest</th><th>Mobile</th><th>Room</th><th>Check-In</th><th>Check-Out</th><th>Total</th></tr>");
 
             for (Reservation r : results) {
                 out.println("<tr>");
                 out.println("<td>" + r.getReservationId() + "</td>");
                 out.println("<td>" + r.getGuestName() + "</td>");
+                out.println("<td>" + r.getContactNumber() + "</td>");
                 out.println("<td>" + r.getRoom().getRoomId() + "</td>");
                 out.println("<td>" + r.getCheckInDate() + "</td>");
                 out.println("<td>" + r.getCheckOutDate() + "</td>");
@@ -740,7 +762,7 @@ public class ReservationServlet extends HttpServlet {
             out.println("</table>");
         }
 
-        out.println("<a class='back' href='" + request.getContextPath() + "/reserve'>← Back to Reservation</a>");
+        out.println("<a class='back' href='" + request.getContextPath() + "/reservation.html'>← Back to Dashboard</a>");
         out.println("</div>");
         out.println("<a href='help' class='help-btn'>?</a>");
         out.println("</body></html>");
@@ -770,6 +792,7 @@ public class ReservationServlet extends HttpServlet {
         reservation.setGuestName(request.getParameter("guestName"));
         reservation.setAddress(request.getParameter("address"));
         reservation.setContactNumber(request.getParameter("contactNumber"));
+        reservation.setEmail(request.getParameter("email"));
         reservation.setRoom(room);
         reservation.setCheckInDate(LocalDate.parse(request.getParameter("checkIn")));
         reservation.setCheckOutDate(LocalDate.parse(request.getParameter("checkOut")));
