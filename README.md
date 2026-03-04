@@ -1,8 +1,4 @@
-Good idea — adding a **proper README** will make Screenshot 18 look professional and also improve your GitHub repository. Below is a **clean academic README** suitable for your project.
 
-You can copy this directly into **`README.md`** in your repository.
-
----
 
 # Ocean View Resort Reservation Management System
 
